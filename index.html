@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scheda UW Merchant</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #e2e0d8;
+    --border-dark: #c8c5bb;
+    --text: #1a1917;
+    --text-muted: #6b6860;
+    --accent: #1e3a5f;
+    --accent-light: #e8eef5;
+    --success: #1a5c3a;
+    --success-bg: #e8f5ee;
+    --danger: #8b1a1a;
+    --danger-bg: #fdf0f0;
+    --font: 'Georgia', serif;
+    --font-sans: system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    font-family: var(--font-sans);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--accent);
+    color: white;
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  header .logo {
+    font-family: var(--font);
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+  }
+
+  header .subtitle {
+    font-size: 0.75rem;
+    opacity: 0.65;
+    margin-top: 2px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .divider {
+    width: 1px;
+    height: 32px;
+    background: rgba(255,255,255,0.25);
+  }
+
+  main {
+    max-width: 860px;
+    margin: 2.5rem auto;
+    padding: 0 1.5rem;
+  }
+
+  .upload-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .upload-card h2 {
+    font-family: var(--font);
+    font-size: 1.1rem;
+    font-weight: normal;
+    color: var(--text);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .upload-card h2::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 1.1rem;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .drop-zone {
+    border: 2px dashed var(--border-dark);
+    border-radius: 6px;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+  }
+
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .drop-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .drop-zone .icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    display: block;
+    opacity: 0.4;
+  }
+
+  .drop-zone p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .drop-zone strong {
+    color: var(--accent);
+  }
+
+  .file-selected {
+    display: none;
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--accent-light);
+    border: 1px solid #c5d4e8;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .file-selected .file-name {
+    flex: 1;
+    font-weight: 500;
+    color: var(--accent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-selected .file-size {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+  }
+
+  .btn-remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0 4px;
+  }
+
+  .btn-remove:hover { color: var(--danger); }
+
+  .btn-generate {
+    width: 100%;
+    margin-top: 1.25rem;
+    padding: 0.85rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: opacity 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .btn-generate:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .btn-generate:not(:disabled):hover { opacity: 0.88; }
+
+  .status {
+    display: none;
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .status.loading {
+    display: flex;
+    background: var(--accent-light);
+    color: var(--accent);
+    border: 1px solid #c5d4e8;
+  }
+
+  .status.error {
+    display: flex;
+    background: var(--danger-bg);
+    color: var(--danger);
+    border: 1px solid #f0c5c5;
+  }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(30,58,95,0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===== SCHEDA OUTPUT ===== */
+  #scheda-output {
+    display: none;
+  }
+
+  .scheda-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .scheda-toolbar h2 {
+    font-family: var(--font);
+    font-size: 1.1rem;
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .scheda-toolbar h2::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 1.1rem;
+    background: var(--success);
+    border-radius: 2px;
+  }
+
+  .toolbar-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn-action {
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--border-dark);
+    background: var(--surface);
+    border-radius: 5px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    color: var(--text);
+    transition: background 0.12s;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .btn-action:hover { background: var(--bg); }
+
+  .scheda-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+  }
+
+  /* ===== SCHEDA STYLES (replicated from local) ===== */
+  .scheda { font-family: var(--font-sans); }
+
+  .scheda-header {
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .scheda-header .ragione-sociale {
+    font-family: var(--font);
+    font-size: 1.4rem;
+    color: var(--accent);
+    font-weight: normal;
+  }
+
+  .scheda-header .meta {
+    text-align: right;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .scheda-header .meta strong {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .badge-blue { background: var(--accent-light); color: var(--accent); }
+  .badge-green { background: var(--success-bg); color: var(--success); }
+
+  .section {
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.35rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem 1rem; }
+
+  .field { margin-bottom: 0.1rem; }
+  .field-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.15rem;
+  }
+  .field-value {
+    font-size: 0.9rem;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .field-value.mono { font-family: 'Courier New', monospace; font-size: 0.85rem; }
+
+  .amount {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .amount.positive { color: var(--success); }
+  .amount.negative { color: var(--danger); }
+
+  .soci-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .soci-table th {
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+
+  .soci-table td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .soci-table tr:last-child td { border-bottom: none; }
+
+  .soci-table .cf { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); }
+
+  .note-box {
+    background: #fffbf0;
+    border: 1px solid #e8d8a0;
+    border-radius: 5px;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #5a4a0a;
+  }
+
+  .highlight-row {
+    background: var(--accent-light);
+    border: 1px solid #c5d4e8;
+    border-radius: 5px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+
+  .highlight-row .label { font-size: 0.85rem; color: var(--text-muted); }
+
+  @media print {
+    header, .upload-card, .scheda-toolbar { display: none !important; }
+    main { margin: 0; padding: 0; max-width: none; }
+    .scheda-container { border: none; padding: 0; }
+    #scheda-output { display: block !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">Scheda UW Merchant</div>
+    <div class="subtitle">Analisi Dichiarazioni dei Redditi</div>
+  </div>
+</header>
+
+<main>
+  <div class="upload-card">
+    <h2>Carica la dichiarazione</h2>
+
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="pdfInput" accept="application/pdf,.zip">
+      <span class="icon">📄</span>
+      <p><strong>Clicca per selezionare</strong> o trascina il file qui</p>
+      <p style="margin-top:0.4rem; font-size:0.78rem;">Modello Unico SP / PF · PDF o ZIP con immagini</p>
+    </div>
+
+    <div class="file-selected" id="fileSelected">
+      <span>📎</span>
+      <span class="file-name" id="fileName"></span>
+      <span class="file-size" id="fileSize"></span>
+      <button class="btn-remove" id="btnRemove" title="Rimuovi">✕</button>
+    </div>
+
+    <div class="status" id="status">
+      <div class="spinner"></div>
+      <span id="statusMsg">Analisi in corso…</span>
+    </div>
+
+    <button class="btn-generate" id="btnGenerate" disabled>
+      <span>✦</span> Genera scheda cliente
+    </button>
+  </div>
+
+  <div id="scheda-output">
+    <div class="scheda-toolbar">
+      <h2>Scheda cliente generata</h2>
+      <div class="toolbar-actions">
+        <button class="btn-action" onclick="window.print()">🖨 Stampa</button>
+        <button class="btn-action" id="btnCopy">📋 Copia testo</button>
+        <button class="btn-action" onclick="document.getElementById('scheda-output').style.display='none'; document.getElementById('pdfInput').value=''; document.getElementById('fileSelected').style.display='none'; document.getElementById('dropZone').style.display='block'; document.getElementById('btnGenerate').disabled=true; selectedFile=null;">↩ Nuova</button>
+      </div>
+    </div>
+    <div class="scheda-container" id="schedaContent"></div>
+  </div>
+</main>
+
+<script>
+let selectedFile = null;
+
+const dropZone = document.getElementById('dropZone');
+const pdfInput = document.getElementById('pdfInput');
+const fileSelected = document.getElementById('fileSelected');
+const fileName = document.getElementById('fileName');
+const fileSize = document.getElementById('fileSize');
+const btnRemove = document.getElementById('btnRemove');
+const btnGenerate = document.getElementById('btnGenerate');
+const status = document.getElementById('status');
+const statusMsg = document.getElementById('statusMsg');
+
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(1) + ' MB';
+}
+
+function setFile(file) {
+  selectedFile = file;
+  fileName.textContent = file.name;
+  fileSize.textContent = formatBytes(file.size);
+  fileSelected.style.display = 'flex';
+  btnGenerate.disabled = false;
+}
+
+pdfInput.addEventListener('change', e => { if (e.target.files[0]) setFile(e.target.files[0]); });
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+});
+
+btnRemove.addEventListener('click', () => {
+  selectedFile = null;
+  pdfInput.value = '';
+  fileSelected.style.display = 'none';
+  btnGenerate.disabled = true;
+  status.className = 'status';
+});
+
+btnGenerate.addEventListener('click', async () => {
+  if (!selectedFile) return;
+
+  btnGenerate.disabled = true;
+  status.className = 'status loading';
+  statusMsg.textContent = 'Lettura del file in corso…';
+  document.getElementById('scheda-output').style.display = 'none';
+
+  try {
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    statusMsg.textContent = 'Analisi AI della dichiarazione…';
+
+    const resp = await fetch('/api/genera-scheda', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: 'Errore server' }));
+      throw new Error(err.error || `Errore ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    document.getElementById('schedaContent').innerHTML = data.html;
+    document.getElementById('scheda-output').style.display = 'block';
+    document.getElementById('scheda-output').scrollIntoView({ behavior: 'smooth' });
+    status.className = 'status';
+
+  } catch (err) {
+    status.className = 'status error';
+    statusMsg.textContent = err.message;
+  } finally {
+    btnGenerate.disabled = false;
+  }
+});
+
+document.getElementById('btnCopy').addEventListener('click', () => {
+  const text = document.getElementById('schedaContent').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById('btnCopy').textContent = '✓ Copiato';
+    setTimeout(() => document.getElementById('btnCopy').textContent = '📋 Copia testo', 2000);
+  });
+});
+</script>
+</body>
+</html>
