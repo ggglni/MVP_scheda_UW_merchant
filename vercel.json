@@ -1,23 +1,12 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "api/genera-scheda.py",
-      "use": "@vercel/python"
-    }
-  ],
   "routes": [
-    {
-      "src": "/api/genera-scheda",
-      "dest": "/api/genera-scheda.py"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+    { "src": "/api/genera-scheda", "dest": "/api/genera-scheda.js" },
+    { "src": "/api/schede", "dest": "/api/schede.js" },
+    { "src": "/api/scheda", "dest": "/api/scheda.js" },
+    { "src": "/schede.html", "dest": "/public/schede.html" },
+    { "src": "/scheda.html", "dest": "/public/scheda.html" },
+    { "src": "/", "dest": "/public/index.html" },
+    { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
