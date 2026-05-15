@@ -1,19 +1,9 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/genera-scheda.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
-    }
-  ],
   "routes": [
     {
       "src": "/api/genera-scheda",
-      "dest": "/api/genera-scheda.py"
+      "dest": "/api/genera-scheda.js"
     },
     {
       "src": "/(.*)",
