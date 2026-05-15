@@ -3,77 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Schede — UW Merchant</title>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #f5f4f0; --surface: #ffffff; --border: #e2e0d8; --border-dark: #c8c5bb;
-    --text: #1a1917; --text-muted: #6b6860; --accent: #1e3a5f; --accent-light: #e8eef5;
-    --font: 'Georgia', serif; --font-sans: system-ui, -apple-system, sans-serif;
-  }
-  body { background: var(--bg); font-family: var(--font-sans); color: var(--text); min-height: 100vh; }
-  header {
-    background: var(--accent); color: white; padding: 1.25rem 2rem;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  header .logo { font-family: var(--font); font-size: 1.1rem; }
-  header .subtitle { font-size: 0.75rem; opacity: 0.65; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
-  header nav a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.85rem; margin-left: 1.5rem; }
-  header nav a:hover { color: white; }
-  header nav a.active { color: white; font-weight: 500; }
-  main { max-width: 960px; margin: 2.5rem auto; padding: 0 1.5rem; }
-  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-  .page-header h1 { font-family: var(--font); font-size: 1.4rem; font-weight: normal; }
-  .page-header a {
-    padding: 0.5rem 1rem; background: var(--accent); color: white;
-    text-decoration: none; border-radius: 6px; font-size: 0.85rem;
-  }
-  .search-bar {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.25rem;
-    display: flex; align-items: center; gap: 0.75rem;
-  }
-  .search-bar input {
-    border: none; outline: none; font-size: 0.9rem; flex: 1;
-    background: transparent; color: var(--text);
-  }
-  .search-bar .icon { color: var(--text-muted); font-size: 1rem; }
-  .card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 8px; overflow: hidden;
-  }
-  table { width: 100%; border-collapse: collapse; }
-  thead th {
-    text-align: left; font-size: 0.72rem; text-transform: uppercase;
-    letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600;
-    padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border);
-    background: var(--bg);
-  }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: var(--accent-light); }
-  tbody td { padding: 0.9rem 1.25rem; font-size: 0.875rem; }
-  td.nome { font-weight: 500; color: var(--text); }
-  td.cf { font-family: monospace; font-size: 0.82rem; color: var(--text-muted); }
-  td.anno { color: var(--text-muted); }
-  td.data { color: var(--text-muted); font-size: 0.8rem; }
-  .btn-scheda {
-    display: inline-block; padding: 0.35rem 0.85rem;
-    border: 1px solid var(--border-dark); border-radius: 5px;
-    font-size: 0.78rem; color: var(--accent); text-decoration: none;
-    transition: background 0.12s;
-  }
-  .btn-scheda:hover { background: var(--accent-light); }
-  .empty {
-    text-align: center; padding: 3rem 1rem;
-    color: var(--text-muted); font-size: 0.9rem;
-  }
-  .empty a { color: var(--accent); }
-  .count { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem; }
-  .loading { text-align: center; padding: 2rem; color: var(--text-muted); }
-</style>
+<title>Archivio Schede — UW Merchant</title>
+<link rel="stylesheet" href="/style.css">
 </head>
 <body>
+
 <header>
   <div>
     <div class="logo">Scheda UW Merchant</div>
@@ -85,21 +19,21 @@
   </nav>
 </header>
 
-<main>
+<main class="wide">
   <div class="page-header">
     <h1>Archivio schede</h1>
-    <a href="/">+ Nuova scheda</a>
+    <a href="/" class="btn-accent">+ Nuova scheda</a>
   </div>
 
   <div class="search-bar">
-    <span class="icon">🔍</span>
+    <span>🔍</span>
     <input type="text" id="searchInput" placeholder="Cerca per nome o codice fiscale…">
   </div>
 
   <div class="count" id="count"></div>
 
   <div class="card">
-    <div id="tableContainer" class="loading">Caricamento…</div>
+    <div id="tableContainer" class="loading-msg">Caricamento…</div>
   </div>
 </main>
 
@@ -113,23 +47,23 @@ async function loadSchede() {
     allSchede = data.schede || [];
     render(allSchede);
   } catch (e) {
-    document.getElementById('tableContainer').innerHTML = '<div class="empty">Errore nel caricamento delle schede.</div>';
+    document.getElementById('tableContainer').innerHTML = '<div class="empty">Errore nel caricamento.</div>';
   }
 }
 
 function formatDate(iso) {
   if (!iso) return '';
-  const d = new Date(iso);
-  return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  return new Date(iso).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
 function render(schede) {
-  const count = document.getElementById('count');
-  count.textContent = schede.length === 0 ? '' : `${schede.length} scheda${schede.length !== 1 ? 'e' : ''} trovata${schede.length !== 1 ? 'e' : ''}`;
+  document.getElementById('count').textContent = schede.length
+    ? `${schede.length} scheda${schede.length !== 1 ? 'e' : ''} trovata${schede.length !== 1 ? 'e' : ''}`
+    : '';
 
   if (schede.length === 0) {
-    document.getElementById('tableContainer').innerHTML = `
-      <div class="empty">Nessuna scheda trovata. <a href="/">Genera la prima scheda →</a></div>`;
+    document.getElementById('tableContainer').innerHTML =
+      `<div class="empty">Nessuna scheda trovata. <a href="/">Genera la prima scheda →</a></div>`;
     return;
   }
 
@@ -137,7 +71,7 @@ function render(schede) {
     <table>
       <thead>
         <tr>
-          <th>Nome / Ragione sociale</th>
+          <th>Ragione sociale</th>
           <th>Codice fiscale</th>
           <th>Anno</th>
           <th>Tipo</th>
@@ -153,7 +87,7 @@ function render(schede) {
             <td class="anno">${s.anno_imposta || 'n.d.'}</td>
             <td class="anno">${s.tipo_dichiarazione || 'n.d.'}</td>
             <td class="data">${formatDate(s.created_at)}</td>
-            <td><a class="btn-scheda" href="/scheda.html?id=${encodeURIComponent(s.id)}">Apri scheda →</a></td>
+            <td><a class="btn-scheda" href="/scheda.html?id=${encodeURIComponent(s.id)}">Apri →</a></td>
           </tr>`).join('')}
       </tbody>
     </table>`;
@@ -161,12 +95,10 @@ function render(schede) {
 
 document.getElementById('searchInput').addEventListener('input', function() {
   const q = this.value.toLowerCase().trim();
-  if (!q) { render(allSchede); return; }
-  const filtered = allSchede.filter(s =>
+  render(q ? allSchede.filter(s =>
     (s.ragione_sociale || '').toLowerCase().includes(q) ||
     (s.codice_fiscale || '').toLowerCase().includes(q)
-  );
-  render(filtered);
+  ) : allSchede);
 });
 
 loadSchede();

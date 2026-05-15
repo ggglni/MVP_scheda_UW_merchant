@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scheda UW Merchant</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">Scheda UW Merchant</div>
+    <div class="subtitle">Analisi Dichiarazioni dei Redditi</div>
+  </div>
+  <nav>
+    <a href="/" class="active">Nuova scheda</a>
+    <a href="/schede.html">Archivio schede</a>
+  </nav>
+</header>
+
+<main>
+  <div class="card-padded">
+    <h2>Carica la dichiarazione</h2>
+
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="pdfInput" accept="application/pdf,.zip">
+      <span class="icon">📄</span>
+      <p><strong>Clicca per selezionare</strong> o trascina il file qui</p>
+      <p style="margin-top:0.4rem;font-size:0.78rem;">Modello Unico SP / PF · PDF o ZIP con immagini</p>
+    </div>
+
+    <div class="file-selected" id="fileSelected">
+      <span>📎</span>
+      <span class="file-name" id="fileName"></span>
+      <span class="file-size" id="fileSize"></span>
+      <button class="btn-remove" id="btnRemove" title="Rimuovi">✕</button>
+    </div>
+
+    <div class="status" id="status">
+      <div class="spinner"></div>
+      <span id="statusMsg">Analisi in corso…</span>
+    </div>
+
+    <button class="btn-primary" id="btnGenerate" disabled>
+      <span>✦</span> Genera scheda cliente
+    </button>
+  </div>
+
+  <div id="scheda-output" style="display:none;">
+    <div class="scheda-toolbar">
+      <h2>Scheda cliente generata</h2>
+      <div class="toolbar-actions">
+        <button class="btn-action" onclick="window.print()">🖨 Stampa</button>
+        <button class="btn-action" id="btnCopy">📋 Copia testo</button>
+        <a class="btn-action" href="/schede.html">📁 Archivio</a>
+        <button class="btn-action" onclick="resetForm()">↩ Nuova</button>
+      </div>
+    </div>
+    <div class="card-padded" id="schedaContent" style="margin-bottom:0;"></div>
+  </div>
+</main>
+
+<script>
+let selectedFile = null;
+
+const dropZone = document.getElementById('dropZone');
+const pdfInput = document.getElementById('pdfInput');
+const fileSelected = document.getElementById('fileSelected');
+const fileName = document.getElementById('fileName');
+const fileSize = document.getElementById('fileSize');
+const btnRemove = document.getElementById('btnRemove');
+const btnGenerate = document.getElementById('btnGenerate');
+const status = document.getElementById('status');
+const statusMsg = document.getElementById('statusMsg');
+
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(1) + ' MB';
+}
+
+function setFile(file) {
+  selectedFile = file;
+  fileName.textContent = file.name;
+  fileSize.textContent = formatBytes(file.size);
+  fileSelected.style.display = 'flex';
+  btnGenerate.disabled = false;
+}
+
+function resetForm() {
+  selectedFile = null;
+  pdfInput.value = '';
+  fileSelected.style.display = 'none';
+  btnGenerate.disabled = true;
+  status.className = 'status';
+  document.getElementById('scheda-output').style.display = 'none';
+}
+
+pdfInput.addEventListener('change', e => { if (e.target.files[0]) setFile(e.target.files[0]); });
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+});
+btnRemove.addEventListener('click', resetForm);
+
+btnGenerate.addEventListener('click', async () => {
+  if (!selectedFile) return;
+  btnGenerate.disabled = true;
+  status.className = 'status loading';
+  statusMsg.textContent = 'Analisi AI della dichiarazione…';
+  document.getElementById('scheda-output').style.display = 'none';
+
+  try {
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    const resp = await fetch('/api/genera-scheda', { method: 'POST', body: formData });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: 'Errore server' }));
+      throw new Error(err.error || `Errore ${resp.status}`);
+    }
+    const data = await resp.json();
+    document.getElementById('schedaContent').innerHTML = data.html;
+    document.getElementById('scheda-output').style.display = 'block';
+    document.getElementById('scheda-output').scrollIntoView({ behavior: 'smooth' });
+    status.className = 'status';
+  } catch (err) {
+    status.className = 'status error';
+    statusMsg.textContent = err.message;
+  } finally {
+    btnGenerate.disabled = false;
+  }
+});
+
+document.getElementById('btnCopy').addEventListener('click', () => {
+  const text = document.getElementById('schedaContent').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById('btnCopy').textContent = '✓ Copiato';
+    setTimeout(() => document.getElementById('btnCopy').textContent = '📋 Copia testo', 2000);
+  });
+});
+</script>
+</body>
+</html>

@@ -4,75 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Scheda — UW Merchant</title>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #f5f4f0; --surface: #ffffff; --border: #e2e0d8; --border-dark: #c8c5bb;
-    --text: #1a1917; --text-muted: #6b6860; --accent: #1e3a5f; --accent-light: #e8eef5;
-    --success: #1a5c3a; --success-bg: #e8f5ee; --danger: #8b1a1a; --danger-bg: #fdf0f0;
-    --font: 'Georgia', serif; --font-sans: system-ui, -apple-system, sans-serif;
-  }
-  body { background: var(--bg); font-family: var(--font-sans); color: var(--text); min-height: 100vh; }
-  header {
-    background: var(--accent); color: white; padding: 1.25rem 2rem;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  header .logo { font-family: var(--font); font-size: 1.1rem; }
-  header .subtitle { font-size: 0.75rem; opacity: 0.65; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
-  header nav a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 0.85rem; margin-left: 1.5rem; }
-  header nav a:hover { color: white; }
-  main { max-width: 860px; margin: 2.5rem auto; padding: 0 1.5rem; }
-  .toolbar {
-    display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;
-  }
-  .toolbar .back { color: var(--accent); text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 0.3rem; }
-  .toolbar-actions { display: flex; gap: 0.5rem; }
-  .btn-action {
-    padding: 0.45rem 0.9rem; border: 1px solid var(--border-dark);
-    background: var(--surface); border-radius: 5px; font-size: 0.78rem;
-    cursor: pointer; color: var(--text); transition: background 0.12s;
-  }
-  .btn-action:hover { background: var(--bg); }
-  .scheda-container { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; }
-  .loading { text-align: center; padding: 3rem; color: var(--text-muted); }
-
-  /* Scheda styles */
-  .scheda { font-family: var(--font-sans); }
-  .scheda-header { border-bottom: 2px solid var(--accent); padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
-  .ragione-sociale { font-family: var(--font); font-size: 1.4rem; color: var(--accent); font-weight: normal; }
-  .meta { text-align: right; font-size: 0.78rem; color: var(--text-muted); line-height: 1.6; }
-  .meta strong { display: block; font-size: 0.9rem; color: var(--text); }
-  .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 3px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
-  .badge-blue { background: var(--accent-light); color: var(--accent); }
-  .badge-green { background: var(--success-bg); color: var(--success); }
-  .section { margin-bottom: 1.5rem; }
-  .section-title { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; margin-bottom: 0.9rem; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 1.5rem; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.6rem 1rem; }
-  .field { margin-bottom: 0.1rem; }
-  .field-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.15rem; }
-  .field-value { font-size: 0.9rem; color: var(--text); font-weight: 500; }
-  .field-value.mono { font-family: 'Courier New', monospace; font-size: 0.85rem; }
-  .amount { font-size: 1.1rem; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; }
-  .amount.positive { color: var(--success); }
-  .amount.negative { color: var(--danger); }
-  .soci-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-  .soci-table th { text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--border); font-weight: 600; }
-  .soci-table td { padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); color: var(--text); }
-  .soci-table tr:last-child td { border-bottom: none; }
-  .soci-table .cf { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); }
-  .note-box { background: #fffbf0; border: 1px solid #e8d8a0; border-radius: 5px; padding: 0.75rem 1rem; font-size: 0.85rem; line-height: 1.6; color: #5a4a0a; }
-  .highlight-row { background: var(--accent-light); border: 1px solid #c5d4e8; border-radius: 5px; padding: 0.75rem 1rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
-  .highlight-row .label { font-size: 0.85rem; color: var(--text-muted); }
-
-  @media print {
-    header, .toolbar { display: none !important; }
-    main { margin: 0; padding: 0; max-width: none; }
-    .scheda-container { border: none; padding: 0; }
-  }
-</style>
+<link rel="stylesheet" href="/style.css">
 </head>
 <body>
+
 <header>
   <div>
     <div class="logo">Scheda UW Merchant</div>
@@ -93,8 +28,8 @@
     </div>
   </div>
 
-  <div class="scheda-container" id="schedaContent">
-    <div class="loading">Caricamento scheda…</div>
+  <div class="card-padded" id="schedaContent">
+    <div class="loading-msg">Caricamento scheda…</div>
   </div>
 </main>
 
@@ -103,10 +38,9 @@ async function loadScheda() {
   const params = new URLSearchParams(window.location.search);
   const id = params.get('id');
   if (!id) {
-    document.getElementById('schedaContent').innerHTML = '<div class="loading">ID scheda mancante.</div>';
+    document.getElementById('schedaContent').innerHTML = '<div class="loading-msg">ID scheda mancante.</div>';
     return;
   }
-
   try {
     const cleanId = id.replace('scheda:', '');
     const resp = await fetch(`/api/scheda?id=${encodeURIComponent(cleanId)}`);
@@ -115,13 +49,12 @@ async function loadScheda() {
     document.getElementById('schedaContent').innerHTML = data.html;
     document.title = `${data.ragione_sociale} — UW Merchant`;
   } catch (e) {
-    document.getElementById('schedaContent').innerHTML = `<div class="loading">Errore: ${e.message}</div>`;
+    document.getElementById('schedaContent').innerHTML = `<div class="loading-msg">Errore: ${e.message}</div>`;
   }
 }
 
 document.getElementById('btnCopy').addEventListener('click', () => {
-  const text = document.getElementById('schedaContent').innerText;
-  navigator.clipboard.writeText(text).then(() => {
+  navigator.clipboard.writeText(document.getElementById('schedaContent').innerText).then(() => {
     document.getElementById('btnCopy').textContent = '✓ Copiato';
     setTimeout(() => document.getElementById('btnCopy').textContent = '📋 Copia testo', 2000);
   });
